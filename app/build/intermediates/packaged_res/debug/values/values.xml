@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="headerBackground">#1976D2</color>
+    <string name="app_name">Open WebUI</string>
+    <string name="cancel">Cancel</string>
+    <string name="connect">Connect</string>
+    <string name="connection_error">Connection Error</string>
+    <string name="invalid_url">Invalid URL. Please enter a valid URL.</string>
+    <string name="loading">Loading…</string>
+    <string name="server_url">Server URL</string>
+    <string name="settings">Settings</string>
+</resources>

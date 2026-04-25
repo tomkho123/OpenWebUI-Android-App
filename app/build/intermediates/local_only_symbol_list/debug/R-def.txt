@@ -1,0 +1,24 @@
+R_DEF: Internal format may change without notice
+local
+color colorAccent
+color colorPrimary
+color colorPrimaryDark
+color headerBackground
+drawable header_background
+id btnCancel
+id btnConnect
+id btnSettings
+id cbSaveUrl
+id etServerUrl
+id progressBar
+id webView
+layout activity_main
+layout dialog_settings
+string app_name
+string cancel
+string connect
+string connection_error
+string invalid_url
+string loading
+string server_url
+string settings

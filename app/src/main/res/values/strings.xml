@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Open WebUI</string>
+    <string name="settings">Settings</string>
+    <string name="connect">Connect</string>
+    <string name="cancel">Cancel</string>
+    <string name="server_url">Server URL</string>
+    <string name="loading">Loading…</string>
+    <string name="connection_error">Connection Error</string>
+    <string name="invalid_url">Invalid URL. Please enter a valid URL.</string>
+</resources>

@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "com.openwebui.app-merged_res-31:/layout_dialog_settings.xml.flat",
+        "source": "com.openwebui.app-main-33:/layout/dialog_settings.xml"
+    },
+    {
+        "merged": "com.openwebui.app-merged_res-31:/drawable_header_background.xml.flat",
+        "source": "com.openwebui.app-main-33:/drawable/header_background.xml"
+    },
+    {
+        "merged": "com.openwebui.app-merged_res-31:/layout_activity_main.xml.flat",
+        "source": "com.openwebui.app-main-33:/layout/activity_main.xml"
+    }
+]
