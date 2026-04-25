@@ -7,12 +7,25 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
+# JNI for Android
 jni = "0.21"
 log = "0.4"
 
-# Servo dependencies - will add actual Servo crates later
-# For now, using placeholder dependencies
+# Servo dependencies - using embedder API
+# Note: These are simplified - full Servo integration requires more
+[target.'cfg(target_os = "android")'.dependencies]
 libc = "0.2"
+
+# Servo embedder dependencies (when available)
+# servo = { git = "https://github.com/servo/servo", branch = "master" }
+# embedder = { git = "https://github.com/servo/embedder" }
 
 [features]
 default = []
+# Enable Servo features when available
+# servo = ["servo_embedding"]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1

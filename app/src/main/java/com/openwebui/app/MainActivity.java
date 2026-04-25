@@ -67,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT));
 
         setContentView(servoView);
+
+        // Set URL change listener to update title if needed
+        servoView.setOnUrlChangedListener(url -> {
+            // Could update UI or log
+            android.util.Log.i("ServoView", "URL changed to: " + url);
+        });
     }
 
     private void setupGestures() {
