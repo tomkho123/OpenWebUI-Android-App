@@ -28,8 +28,12 @@ jobs:
     - name: Install Android NDK
       run: |
         sudo apt-get update
-        sudo apt-get install -y android-ndk-r25
-        echo "ANDROID_NDK_HOME=/usr/lib/android-ndk-r25" >> $GITHUB_ENV
+        sudo apt-get install -y wget unzip
+        wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+        unzip -q android-ndk-r25c-linux.zip
+        sudo mv android-ndk-r25c /usr/local/lib/android-ndk-r25
+        echo "ANDROID_NDK_HOME=/usr/local/lib/android-ndk-r25" >> $GITHUB_ENV
+        echo "ANDROID_NDK_ROOT=/usr/local/lib/android-ndk-r25" >> $GITHUB_ENV
 
     - name: Cache Cargo registry
       uses: actions/cache@v4
@@ -42,10 +46,14 @@ jobs:
         restore-keys: |
           cargo-
 
-    - name: Build Servo libraries
+    - name: Build Servo libraries (ARMv7)
       run: |
         cd servo
         cargo build --target armv7-linux-androideabi --release
+
+    - name: Build Servo libraries (ARM64)
+      run: |
+        cd servo
         cargo build --target aarch64-linux-android --release
 
     - name: Copy native libraries to jniLibs
