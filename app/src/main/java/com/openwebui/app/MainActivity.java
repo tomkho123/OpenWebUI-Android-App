@@ -9,9 +9,6 @@ import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -21,7 +18,7 @@ import androidx.core.view.GestureDetectorCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    private WebView webView;
+    private ServoView servoView;
     private String serverUrl;
     private GestureDetectorCompat gestureDetector;
     private static final String PREFS_NAME = "OpenWebUIPrefs";
@@ -63,16 +60,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupFullscreenUI() {
-        // Create WebView only (fullscreen)
-        webView = new WebView(this);
-        webView.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
+        // Create ServoView only (fullscreen)
+        servoView = new ServoView(this);
+        servoView.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT));
 
-        setContentView(webView);
-
-        // Configure WebView
-        configureWebView();
+        setContentView(servoView);
     }
 
     private void setupGestures() {
@@ -92,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        webView.setOnTouchListener((v, event) -> {
+        servoView.setOnTouchListener((v, event) -> {
             gestureDetector.onTouchEvent(event);
             return false;
         });
@@ -160,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         serverUrl = url;
-        webView.loadUrl(serverUrl);
+        servoView.loadUrl(serverUrl);
     }
 
     private void showSettingsDialog() {
@@ -244,12 +238,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            // Show settings dialog on back press (to exit or change server)
-            showSettingsDialog();
-        }
+        // Show settings dialog on back press (to exit or change server)
+        showSettingsDialog();
     }
 
     @Override
