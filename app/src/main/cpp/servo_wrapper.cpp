@@ -7,14 +7,14 @@
 
 // Rust functions declared in servo library
 extern "C" {
-    extern int rust_init();
-    extern void rust_load_url(const char* url);
-    extern void rust_go_back();
-    extern void rust_reload();
-    extern void rust_cleanup();
-    extern void rust_set_surface(long surface_ptr, int width, int height);
-    extern int rust_handle_touch_event(int action, float x, float y);
-    extern const char* rust_get_url();
+    extern int Java_com_openwebui_app_ServoView_init();
+    extern void Java_com_openwebui_app_ServoView_loadUrl(const char* url);
+    extern void Java_com_openwebui_app_ServoView_goBack();
+    extern void Java_com_openwebui_app_ServoView_reload();
+    extern void Java_com_openwebui_app_ServoView_cleanup();
+    extern void Java_com_openwebui_app_ServoView_setSurface(long surface_ptr, int width, int height);
+    extern int Java_com_openwebui_app_ServoView_handleTouchEvent(int action, float x, float y);
+    extern const char* Java_com_openwebui_app_ServoView_getUrl();
 }
 
 // Get native surface pointer using JNI
@@ -41,7 +41,7 @@ Java_com_openwebui_app_ServoView_nativeInit(
     jobject thiz
 ) {
     __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Native init called");
-    rust_init();
+    Java_com_openwebui_app_ServoView_init();
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -58,7 +58,7 @@ Java_com_openwebui_app_ServoView_nativeLoadUrl(
     const char *urlStr = env->GetStringUTFChars(url, 0);
     __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Loading URL: %s", urlStr);
 
-    rust_load_url(urlStr);
+    Java_com_openwebui_app_ServoView_loadUrl(urlStr);
 
     env->ReleaseStringUTFChars(url, urlStr);
 }
@@ -69,7 +69,7 @@ Java_com_openwebui_app_ServoView_nativeGoBack(
     jobject thiz
 ) {
     __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Go back called");
-    rust_go_back();
+    Java_com_openwebui_app_ServoView_goBack();
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -78,7 +78,7 @@ Java_com_openwebui_app_ServoView_nativeReload(
     jobject thiz
 ) {
     __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Reload called");
-    rust_reload();
+    Java_com_openwebui_app_ServoView_reload();
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -87,7 +87,7 @@ Java_com_openwebui_app_ServoView_nativeCleanup(
     jobject thiz
 ) {
     __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Cleanup called");
-    rust_cleanup();
+    Java_com_openwebui_app_ServoView_cleanup();
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -99,7 +99,7 @@ Java_com_openwebui_app_ServoView_nativeSetSurface(
     jint height
 ) {
     __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Set surface: ptr=%ld, size=%dx%d", surfacePtr, width, height);
-    rust_set_surface((long)surfacePtr, (int)width, (int)height);
+    Java_com_openwebui_app_ServoView_setSurface((long)surfacePtr, (int)width, (int)height);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -111,7 +111,7 @@ Java_com_openwebui_app_ServoView_nativeHandleTouchEvent(
     jfloat y
 ) {
     __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, "Touch: action=%d, x=%.2f, y=%.2f", action, x, y);
-    return (jboolean)rust_handle_touch_event((int)action, (float)x, (float)y);
+    return (jboolean)Java_com_openwebui_app_ServoView_handleTouchEvent((int)action, (float)x, (float)y);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -119,7 +119,7 @@ Java_com_openwebui_app_ServoView_nativeGetUrl(
     JNIEnv* env,
     jobject thiz
 ) {
-    const char* url = rust_get_url();
+    const char* url = Java_com_openwebui_app_ServoView_getUrl();
     jstring result = env->NewStringUTF(url);
     return result;
 }
