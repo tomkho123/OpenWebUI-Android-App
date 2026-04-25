@@ -7,4 +7,7 @@
     <string name="loading">Loading…</string>
     <string name="connection_error">Connection Error</string>
     <string name="invalid_url">Invalid URL. Please enter a valid URL.</string>
+    <string name="gesture_hint">Double-tap or long-press to open settings</string>
+    <string name="settings_dialog_title">Server Settings</string>
+    <string name="save_url">Save server URL</string>
 </resources>

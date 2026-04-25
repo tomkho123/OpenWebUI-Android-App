@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -13,16 +15,15 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GestureDetectorCompat;
 
 public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
-    private ProgressBar progressBar;
-    private Button btnSettings;
     private String serverUrl;
+    private GestureDetectorCompat gestureDetector;
     private static final String PREFS_NAME = "OpenWebUIPrefs";
     private static final String KEY_SERVER_URL = "server_url";
 
@@ -31,8 +32,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Setup UI
-        setupUI();
+        // Enable fullscreen
+        enableFullscreen();
+
+        // Setup fullscreen UI
+        setupFullscreenUI();
+
+        // Setup gesture detector
+        setupGestures();
 
         // Load saved URL or show settings dialog
         serverUrl = getSavedUrl();
@@ -43,61 +50,52 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupUI() {
-        // Create layout programmatically
-        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
-        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-        layout.setPadding(16, 16, 16, 16);
+    private void enableFullscreen() {
+        // Hide status bar and navigation bar
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+    }
 
-        // Create header
-        android.widget.LinearLayout header = new android.widget.LinearLayout(this);
-        header.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-        header.setPadding(12, 12, 12, 12);
-        header.setBackgroundColor(0xFF1976D2);
-
-        android.widget.TextView title = new android.widget.TextView(this);
-        title.setText("Open WebUI");
-        title.setTextSize(20);
-        title.setTextColor(0xFFFFFFFF);
-        title.setPadding(0, 0, 16, 0);
-        title.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
-            0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-
-        btnSettings = new Button(this);
-        btnSettings.setText("⚙️");
-        btnSettings.setTextSize(18);
-        btnSettings.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
-            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
-            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
-        btnSettings.setBackgroundColor(0x00000000);
-        btnSettings.setOnClickListener(v -> showSettingsDialog());
-
-        header.addView(title);
-        header.addView(btnSettings);
-        layout.addView(header);
-
-        // Create WebView
+    private void setupFullscreenUI() {
+        // Create WebView only (fullscreen)
         webView = new WebView(this);
         webView.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
-            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-            0, 1f));
-        layout.addView(webView);
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT));
 
-        // Create ProgressBar
-        progressBar = new ProgressBar(this);
-        progressBar.setVisibility(View.GONE);
-        android.widget.LinearLayout.LayoutParams progressParams =
-            new android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
-        progressParams.gravity = android.view.Gravity.CENTER;
-        progressBar.setLayoutParams(progressParams);
-        layout.addView(progressBar);
-
-        setContentView(layout);
+        setContentView(webView);
 
         // Configure WebView
         configureWebView();
+    }
+
+    private void setupGestures() {
+        gestureDetector = new GestureDetectorCompat(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                // Double tap to open settings
+                showSettingsDialog();
+                return true;
+            }
+
+            @Override
+            public boolean onLongPress(MotionEvent e) {
+                // Long press also opens settings
+                showSettingsDialog();
+                return true;
+            }
+        });
+
+        webView.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            return false;
+        });
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -134,13 +132,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                progressBar.setVisibility(View.GONE);
+                // Re-apply fullscreen after page load
+                enableFullscreen();
                 super.onPageFinished(view, url);
             }
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                progressBar.setVisibility(View.GONE);
                 showError("Connection failed: " + description);
             }
         });
@@ -162,58 +160,61 @@ public class MainActivity extends AppCompatActivity {
         }
 
         serverUrl = url;
-        progressBar.setVisibility(View.VISIBLE);
         webView.loadUrl(serverUrl);
     }
 
     private void showSettingsDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
+        runOnUiThread(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            LayoutInflater inflater = getLayoutInflater();
 
-        View dialogView = inflater.inflate(R.layout.dialog_settings, null);
-        builder.setView(dialogView);
+            View dialogView = inflater.inflate(R.layout.dialog_settings, null);
+            builder.setView(dialogView);
 
-        EditText etServerUrl = dialogView.findViewById(R.id.etServerUrl);
-        CheckBox cbSaveUrl = dialogView.findViewById(R.id.cbSaveUrl);
-        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
-        Button btnConnect = dialogView.findViewById(R.id.btnConnect);
+            EditText etServerUrl = dialogView.findViewById(R.id.etServerUrl);
+            CheckBox cbSaveUrl = dialogView.findViewById(R.id.cbSaveUrl);
+            Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+            Button btnConnect = dialogView.findViewById(R.id.btnConnect);
 
-        // Set current URL
-        if (serverUrl != null) {
-            etServerUrl.setText(serverUrl);
-        }
+            // Set current URL
+            if (serverUrl != null) {
+                etServerUrl.setText(serverUrl);
+            }
 
-        AlertDialog dialog = builder.create();
+            AlertDialog dialog = builder.create();
 
-        btnCancel.setOnClickListener(v -> {
-            if (serverUrl == null || serverUrl.isEmpty()) {
-                finish(); // Exit if no URL set
-            } else {
+            btnCancel.setOnClickListener(v -> {
+                if (serverUrl == null || serverUrl.isEmpty()) {
+                    finish(); // Exit if no URL set
+                } else {
+                    dialog.dismiss();
+                    enableFullscreen(); // Re-enable fullscreen
+                }
+            });
+
+            btnConnect.setOnClickListener(v -> {
+                String inputUrl = etServerUrl.getText().toString().trim();
+
+                if (inputUrl.isEmpty()) {
+                    showError("Please enter a server URL");
+                    return;
+                }
+
+                // Save URL if checked
+                if (cbSaveUrl.isChecked()) {
+                    saveUrl(inputUrl);
+                } else {
+                    clearSavedUrl();
+                }
+
+                serverUrl = inputUrl;
                 dialog.dismiss();
-            }
+                loadServerUrl(serverUrl);
+                enableFullscreen(); // Re-enable fullscreen
+            });
+
+            dialog.show();
         });
-
-        btnConnect.setOnClickListener(v -> {
-            String inputUrl = etServerUrl.getText().toString().trim();
-
-            if (inputUrl.isEmpty()) {
-                showError("Please enter a server URL");
-                return;
-            }
-
-            // Save URL if checked
-            if (cbSaveUrl.isChecked()) {
-                saveUrl(inputUrl);
-            } else {
-                clearSavedUrl();
-            }
-
-            serverUrl = inputUrl;
-            dialog.dismiss();
-            loadServerUrl(serverUrl);
-        });
-
-        dialog.show();
     }
 
     private void saveUrl(String url) {
@@ -236,7 +237,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        runOnUiThread(() -> {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        });
     }
 
     @Override
@@ -244,7 +247,16 @@ public class MainActivity extends AppCompatActivity {
         if (webView.canGoBack()) {
             webView.goBack();
         } else {
-            super.onBackPressed();
+            // Show settings dialog on back press (to exit or change server)
+            showSettingsDialog();
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            enableFullscreen();
         }
     }
 }
