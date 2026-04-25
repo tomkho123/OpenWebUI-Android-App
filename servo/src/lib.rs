@@ -12,9 +12,9 @@ type jobject = JObject<'static>;
 
 /// Initialize Servo engine
 #[no_mangle]
-pub extern "C" fn Java_com_openwebui_app_ServoView_init(
-    mut _env: JNIEnv,
-    _class: JClass,
+pub extern "C" fn Java_com_openwebui_app_ServoView_init<'a>(
+    mut _env: JNIEnv<'a>,
+    _class: JClass<'a>,
 ) -> i32 {
     log::info!("ServoView init called");
 
@@ -35,10 +35,10 @@ pub extern "C" fn Java_com_openwebui_app_ServoView_init(
 
 /// Load URL in Servo
 #[no_mangle]
-pub extern "C" fn Java_com_openwebui_app_ServoView_loadUrl(
-    mut env: JNIEnv,
-    _class: JClass,
-    url: JString,
+pub extern "C" fn Java_com_openwebui_app_ServoView_loadUrl<'a>(
+    mut env: JNIEnv<'a>,
+    _class: JClass<'a>,
+    url: JString<'a>,
 ) {
     let url_str: String = env.get_string(&url).unwrap().into();
     log::info!("Loading URL in Servo: {}", url_str);
@@ -59,9 +59,9 @@ pub extern "C" fn Java_com_openwebui_app_ServoView_loadUrl(
 
 /// Navigate back in Servo history
 #[no_mangle]
-pub extern "C" fn Java_com_openwebui_app_ServoView_goBack(
-    mut _env: JNIEnv,
-    _class: JClass,
+pub extern "C" fn Java_com_openwebui_app_ServoView_goBack<'a>(
+    mut _env: JNIEnv<'a>,
+    _class: JClass<'a>,
 ) {
     log::info!("ServoView goBack called");
 
@@ -73,9 +73,9 @@ pub extern "C" fn Java_com_openwebui_app_ServoView_goBack(
 
 /// Reload current page in Servo
 #[no_mangle]
-pub extern "C" fn Java_com_openwebui_app_ServoView_reload(
-    mut _env: JNIEnv,
-    _class: JClass,
+pub extern "C" fn Java_com_openwebui_app_ServoView_reload<'a>(
+    mut _env: JNIEnv<'a>,
+    _class: JClass<'a>,
 ) {
     log::info!("ServoView reload called");
 
@@ -87,9 +87,9 @@ pub extern "C" fn Java_com_openwebui_app_ServoView_reload(
 
 /// Cleanup Servo instance
 #[no_mangle]
-pub extern "C" fn Java_com_openwebui_app_ServoView_cleanup(
-    mut _env: JNIEnv,
-    _class: JClass,
+pub extern "C" fn Java_com_openwebui_app_ServoView_cleanup<'a>(
+    mut _env: JNIEnv<'a>,
+    _class: JClass<'a>,
 ) {
     log::info!("ServoView cleanup called");
 
@@ -101,10 +101,10 @@ pub extern "C" fn Java_com_openwebui_app_ServoView_cleanup(
 
 /// Set surface for rendering
 #[no_mangle]
-pub extern "C" fn Java_com_openwebui_app_ServoView_setSurface(
-    mut env: JNIEnv,
-    _class: JClass,
-    surface: JObject,
+pub extern "C" fn Java_com_openwebui_app_ServoView_setSurface<'a>(
+    mut env: JNIEnv<'a>,
+    _class: JClass<'a>,
+    surface: JObject<'a>,
     width: jint,
     height: jint,
 ) {
@@ -117,9 +117,9 @@ pub extern "C" fn Java_com_openwebui_app_ServoView_setSurface(
 
 /// Handle touch event
 #[no_mangle]
-pub extern "C" fn Java_com_openwebui_app_ServoView_handleTouchEvent(
-    mut env: JNIEnv,
-    _class: JClass,
+pub extern "C" fn Java_com_openwebui_app_ServoView_handleTouchEvent<'a>(
+    mut env: JNIEnv<'a>,
+    _class: JClass<'a>,
     action: jint,
     x: jfloat,
     y: jfloat,
@@ -133,10 +133,10 @@ pub extern "C" fn Java_com_openwebui_app_ServoView_handleTouchEvent(
 
 /// Get current URL
 #[no_mangle]
-pub extern "C" fn Java_com_openwebui_app_ServoView_getUrl(
-    mut env: JNIEnv,
-    _class: JClass,
-) -> JString {
+pub extern "C" fn Java_com_openwebui_app_ServoView_getUrl<'a>(
+    mut env: JNIEnv<'a>,
+    _class: JClass<'a>,
+) -> JString<'a> {
     // TODO: Get current URL from Servo
     let default_url = "about:blank";
 
