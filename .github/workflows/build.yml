@@ -1,4 +1,4 @@
-name: Build Android APK with Servo
+name: Build Android APK
 
 on:
   push:
@@ -20,49 +20,6 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: armv7-linux-androideabi,aarch64-linux-android
-
-    - name: Install Android NDK
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget unzip
-        wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
-        unzip -q android-ndk-r25c-linux.zip
-        sudo mv android-ndk-r25c /usr/local/lib/android-ndk-r25
-        echo "ANDROID_NDK_HOME=/usr/local/lib/android-ndk-r25" >> $GITHUB_ENV
-        echo "ANDROID_NDK_ROOT=/usr/local/lib/android-ndk-r25" >> $GITHUB_ENV
-
-    - name: Cache Cargo registry
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          servo/target
-        key: cargo-${{ hashFiles('**/Cargo.toml') }}
-        restore-keys: |
-          cargo-
-
-    - name: Build Servo libraries (ARMv7)
-      run: |
-        cd servo
-        cargo build --target armv7-linux-androideabi --release
-
-    - name: Build Servo libraries (ARM64)
-      run: |
-        cd servo
-        cargo build --target aarch64-linux-android --release
-
-    - name: Copy native libraries to jniLibs
-      run: |
-        mkdir -p app/src/main/jniLibs/arm64-v8a
-        mkdir -p app/src/main/jniLibs/armeabi-v7a
-        cp servo/target/armv7-linux-androideabi/release/libopenwebui_servo.so app/src/main/jniLibs/armeabi-v7a/ || true
-        cp servo/target/aarch64-linux-android/release/libopenwebui_servo.so app/src/main/jniLibs/arm64-v8a/ || true
-
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
@@ -72,7 +29,7 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug-servo
+        name: app-debug
         path: app/build/outputs/apk/debug/app-debug.apk
 
     - name: Get APK size

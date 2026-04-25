@@ -15,10 +15,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GestureDetectorCompat;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ServoView servoView;
+    private WebView webView;
     private String serverUrl;
     private GestureDetectorCompat gestureDetector;
     private static final String PREFS_NAME = "OpenWebUIPrefs";
@@ -60,42 +63,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupFullscreenUI() {
-        // Create ServoView only (fullscreen)
-        servoView = new ServoView(this);
-        servoView.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
+        // Create WebView for fullscreen
+        webView = new WebView(this);
+        webView.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT));
 
-        setContentView(servoView);
+        setContentView(webView);
 
-        // Set URL change listener to update title if needed
-        servoView.setOnUrlChangedListener(url -> {
-            // Could update UI or log
-            android.util.Log.i("ServoView", "URL changed to: " + url);
-        });
-    }
-
-    private void setupGestures() {
-        gestureDetector = new GestureDetectorCompat(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                // Double tap to open settings
-                showSettingsDialog();
-                return true;
-            }
-
-            @Override
-            public boolean onLongPress(MotionEvent e) {
-                // Long press also opens settings
-                showSettingsDialog();
-                return true;
-            }
-        });
-
-        servoView.setOnTouchListener((v, event) -> {
-            gestureDetector.onTouchEvent(event);
-            return false;
-        });
+        // Configure WebView
+        configureWebView();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -147,6 +124,29 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebChromeClient(new android.webkit.WebChromeClient());
     }
 
+    private void setupGestures() {
+        gestureDetector = new GestureDetectorCompat(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                // Double tap to open settings
+                showSettingsDialog();
+                return true;
+            }
+
+            @Override
+            public boolean onLongPress(MotionEvent e) {
+                // Long press also opens settings
+                showSettingsDialog();
+                return true;
+            }
+        });
+
+        webView.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            return false;
+        });
+    }
+
     private void loadServerUrl(String url) {
         if (url == null || url.trim().isEmpty()) {
             showError("Please enter a server URL");
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         serverUrl = url;
-        servoView.loadUrl(serverUrl);
+        webView.loadUrl(serverUrl);
     }
 
     private void showSettingsDialog() {
