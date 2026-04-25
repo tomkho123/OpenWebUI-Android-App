@@ -134,10 +134,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onLongPress(MotionEvent e) {
+            public void onLongPress(MotionEvent e) {
                 // Long press also opens settings
                 showSettingsDialog();
-                return true;
             }
         });
 
