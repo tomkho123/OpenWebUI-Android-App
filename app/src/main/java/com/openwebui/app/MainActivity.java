@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.openwebui.app.R;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GestureDetectorCompat;
 import android.webkit.WebSettings;
@@ -33,11 +34,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         try {
+            // Enable whole document drawing for better keyboard handling
+            WebView.enableSlowWholeDocumentDraw();
+
+            // Set content view
+            setContentView(R.layout.activity_main);
+
+            // Get WebView from layout
+            webView = findViewById(R.id.webView);
+
             // Enable fullscreen
             enableFullscreen();
 
-            // Setup fullscreen UI
-            setupFullscreenUI();
+            // Configure WebView
+            configureWebView();
 
             // Setup gesture detector
             setupGestures();
@@ -68,23 +78,6 @@ public class MainActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
-    }
-
-    private void setupFullscreenUI() {
-        // Create WebView for fullscreen
-        webView = new WebView(this);
-        webView.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT));
-
-        // NO padding - let content use full screen
-        // We'll handle notification bar conflicts differently
-        webView.setPadding(0, 0, 0, 0);
-
-        setContentView(webView);
-
-        // Configure WebView
-        configureWebView();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
