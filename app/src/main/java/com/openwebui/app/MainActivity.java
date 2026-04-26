@@ -291,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupKeyboardRescaling() {
-        // Detect keyboard visibility and rescale WebView to fit actual visible area
+        // Detect keyboard visibility and resize WebView layout to fit visible area
         final View activityRootView = getWindow().getDecorView().findViewById(android.R.id.content);
         activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             private final Rect windowVisibleDisplayFrame = new Rect();
@@ -308,24 +308,27 @@ public class MainActivity extends AppCompatActivity {
                     int screenWidth = activityRootView.getRootView().getWidth();
 
                     if (visibleHeight < lastVisibleHeight) {
-                        // Keyboard opened - rescale WebView to fit visible area
-                        float heightRatio = (float) visibleHeight / screenHeight;
-                        float widthRatio = (float) visibleWidth / screenWidth;
+                        // Keyboard opened - resize WebView layout to fit visible area
+                        android.widget.LinearLayout.LayoutParams params =
+                            new android.widget.LinearLayout.LayoutParams(
+                                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                                visibleHeight
+                            );
+                        params.width = visibleWidth;
+                        params.height = visibleHeight;
 
-                        // Use the smaller ratio to ensure content fits both dimensions
-                        float scale = Math.min(heightRatio, widthRatio);
+                        // Center the WebView in the available space
+                        params.gravity = android.view.Gravity.CENTER;
 
-                        // Apply scaling from center for better appearance
-                        webView.setScaleX(scale);
-                        webView.setScaleY(scale);
-                        webView.setPivotX(screenWidth / 2f); // Center horizontally
-                        webView.setPivotY(0); // Keep at top
+                        webView.setLayoutParams(params);
                     } else {
-                        // Keyboard closed - restore original size
-                        webView.setScaleX(1.0f);
-                        webView.setScaleY(1.0f);
-                        webView.setPivotX(0);
-                        webView.setPivotY(0);
+                        // Keyboard closed - restore full screen layout
+                        android.widget.LinearLayout.LayoutParams params =
+                            new android.widget.LinearLayout.LayoutParams(
+                                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                                android.widget.LinearLayout.LayoutParams.MATCH_PARENT
+                            );
+                        webView.setLayoutParams(params);
                     }
                 }
                 lastVisibleHeight = visibleHeight;
