@@ -127,8 +127,10 @@ public class MainActivity extends AppCompatActivity {
                 // Re-apply fullscreen after page load
                 enableFullscreen();
 
-                // Inject CSS for better keyboard handling
-                injectKeyboardOptimizationCSS();
+                // Inject CSS for better keyboard handling with delay to ensure page is ready
+                new android.os.Handler().postDelayed(() -> {
+                    injectKeyboardOptimizationCSS();
+                }, 500);
 
                 super.onPageFinished(view, url);
             }
@@ -191,6 +193,11 @@ public class MainActivity extends AppCompatActivity {
 
         serverUrl = url;
         webView.loadUrl(serverUrl);
+
+        // Inject CSS after a short delay to ensure page starts loading
+        new android.os.Handler().postDelayed(() -> {
+            injectKeyboardOptimizationCSS();
+        }, 1000);
     }
 
     private void showSettingsDialog() {
@@ -283,31 +290,70 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void injectKeyboardOptimizationCSS() {
-        // Inject CSS to optimize content display when keyboard opens
+        // Inject comprehensive CSS and JavaScript for keyboard handling
         String js = "javascript:(function() {" +
+            "// Set proper viewport" +
             "var viewport = document.querySelector('meta[name=viewport]');" +
             "if (viewport) {" +
             "  viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');" +
+            "} else {" +
+            "  var meta = document.createElement('meta');" +
+            "  meta.name = 'viewport';" +
+            "  meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0';" +
+            "  document.head.appendChild(meta);" +
             "}" +
 
+            // Add comprehensive CSS
             "var style = document.createElement('style');" +
+            "style.id = 'keyboard-optimization';" +
             "style.innerHTML = " +
-            "'html, body { height: 100% !important; overflow: auto !important; }' +" +
-            "'input, textarea, select { font-size: 16px !important; }' +" + // Prevent zoom
-            "'@media (max-height: 500px) {" +
-            "  html, body { zoom: 0.85; }' +" + // Zoom out when keyboard opens (height < 500px)
-            "'}';" +
+            "'html, body {" +
+            "  height: 100% !important;" +
+            "  overflow: auto !important;" +
+            "  position: relative;" +
+            "}' +" +
+            "'input, textarea, select {" +
+            "  font-size: 16px !important;" + // Prevent zoom on focus
+            "  max-width: 100% !important;" +
+            "}' +" +
+            "'@media (max-height: 600px) {" +
+            "  html {" +
+            "    zoom: 0.75;" + // Zoom out when keyboard opens
+            "  }" +
+            "}' +" +
+            "'@media (min-height: 601px) {" +
+            "  html {" +
+            "    zoom: 1;" + // Reset zoom when keyboard closes
+            "  }" +
+            "}'+" +
+            "'body.keyboard-open {" +
+            "  zoom: 0.75;" +
+            "}'";" +
             "document.head.appendChild(style);" +
 
-            // Listen for keyboard events and adjust viewport
+            // Add JavaScript to detect keyboard and apply classes
+            "var originalHeight = window.innerHeight;" +
             "window.addEventListener('resize', function() {" +
-            "  var height = window.innerHeight;" +
-            "  if (height < 600) {" +
-            "    document.body.style.zoom = (height / 800).toString();" +
-            "  } else {" +
-            "    document.body.style.zoom = '1';" +
+            "  var currentHeight = window.innerHeight;" +
+            "  var heightDiff = originalHeight - currentHeight;" +
+
+            "  if (heightDiff > 200) {" + // Keyboard opened
+            "    document.body.classList.add('keyboard-open');" +
+            "    document.documentElement.style.zoom = '0.75';" +
+            "  } else {" + // Keyboard closed
+            "    document.body.classList.remove('keyboard-open');" +
+            "    document.documentElement.style.zoom = '1';" +
             "  }" +
             "}, false);" +
+
+            // Force initial check
+            "setTimeout(function() {" +
+            "  if (window.innerHeight < 600) {" +
+            "    document.documentElement.style.zoom = '0.75';" +
+            "  }" +
+            "}, 1000);" +
+
+            "console.log('Keyboard optimization CSS injected');" +
             "})()";
         webView.evaluateJavascript(js, null);
     }
