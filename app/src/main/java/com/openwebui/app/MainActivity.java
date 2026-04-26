@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private GestureDetectorCompat gestureDetector;
     private static final String PREFS_NAME = "OpenWebUIPrefs";
     private static final String KEY_SERVER_URL = "server_url";
+    private int screenWidth;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -35,6 +36,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         try {
+            // Get screen dimensions
+            android.graphics.DisplayMetrics displayMetrics = new android.graphics.DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            screenWidth = displayMetrics.widthPixels;
+
             // Enable fullscreen
             enableFullscreen();
 
@@ -54,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 loadServerUrl(serverUrl);
             }
+
+            // Setup keyboard rescaling
+            setupKeyboardRescaling();
         } catch (Exception e) {
             e.printStackTrace();
             showError("Error initializing app: " + e.getMessage());
@@ -277,6 +286,41 @@ public class MainActivity extends AppCompatActivity {
     private void showError(String message) {
         runOnUiThread(() -> {
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void setupKeyboardRescaling() {
+        // Detect keyboard visibility and rescale WebView instead of pushing content
+        final View activityRootView = getWindow().getDecorView().findViewById(android.R.id.content);
+        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            private final Rect windowVisibleDisplayFrame = new Rect();
+            private int lastVisibleHeight = 0;
+
+            @Override
+            public void onGlobalLayout() {
+                activityRootView.getWindowVisibleDisplayFrame(windowVisibleDisplayFrame);
+                int visibleHeight = windowVisibleDisplayFrame.height();
+
+                if (lastVisibleHeight != 0 && visibleHeight != lastVisibleHeight) {
+                    int screenHeight = activityRootView.getRootView().getHeight();
+
+                    if (visibleHeight < lastVisibleHeight) {
+                        // Keyboard opened - rescale WebView to fit remaining space
+                        float availableRatio = (float) visibleHeight / screenHeight;
+
+                        // Apply uniform scaling to WebView (zoom out)
+                        webView.setScaleX(availableRatio);
+                        webView.setScaleY(availableRatio);
+                        webView.setPivotX(0);
+                        webView.setPivotY(0); // Scale from top-left corner
+                    } else {
+                        // Keyboard closed - restore original size
+                        webView.setScaleX(1.0f);
+                        webView.setScaleY(1.0f);
+                    }
+                }
+                lastVisibleHeight = visibleHeight;
+            }
         });
     }
 
