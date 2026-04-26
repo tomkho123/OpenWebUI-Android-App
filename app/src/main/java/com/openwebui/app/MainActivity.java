@@ -32,21 +32,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Enable fullscreen
-        enableFullscreen();
+        try {
+            // Enable fullscreen
+            enableFullscreen();
 
-        // Setup fullscreen UI
-        setupFullscreenUI();
+            // Setup fullscreen UI
+            setupFullscreenUI();
 
-        // Setup gesture detector
-        setupGestures();
+            // Setup gesture detector
+            setupGestures();
 
-        // Load saved URL or show settings dialog
-        serverUrl = getSavedUrl();
-        if (serverUrl == null || serverUrl.isEmpty()) {
-            showSettingsDialog();
-        } else {
-            loadServerUrl(serverUrl);
+            // Load saved URL or show settings dialog
+            serverUrl = getSavedUrl();
+            if (serverUrl == null || serverUrl.isEmpty()) {
+                // Delay showing dialog to avoid crash during initialization
+                new android.os.Handler().postDelayed(() -> {
+                    showSettingsDialog();
+                }, 500);
+            } else {
+                loadServerUrl(serverUrl);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error initializing app: " + e.getMessage());
         }
     }
 
@@ -163,57 +171,67 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showSettingsDialog() {
-        runOnUiThread(() -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            LayoutInflater inflater = getLayoutInflater();
+        try {
+            runOnUiThread(() -> {
+                try {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    LayoutInflater inflater = getLayoutInflater();
 
-            View dialogView = inflater.inflate(R.layout.dialog_settings, null);
-            builder.setView(dialogView);
+                    View dialogView = inflater.inflate(R.layout.dialog_settings, null);
+                    builder.setView(dialogView);
 
-            EditText etServerUrl = dialogView.findViewById(R.id.etServerUrl);
-            CheckBox cbSaveUrl = dialogView.findViewById(R.id.cbSaveUrl);
-            Button btnCancel = dialogView.findViewById(R.id.btnCancel);
-            Button btnConnect = dialogView.findViewById(R.id.btnConnect);
+                    EditText etServerUrl = dialogView.findViewById(R.id.etServerUrl);
+                    CheckBox cbSaveUrl = dialogView.findViewById(R.id.cbSaveUrl);
+                    Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+                    Button btnConnect = dialogView.findViewById(R.id.btnConnect);
 
-            // Set current URL
-            if (serverUrl != null) {
-                etServerUrl.setText(serverUrl);
-            }
+                    // Set current URL
+                    if (serverUrl != null) {
+                        etServerUrl.setText(serverUrl);
+                    }
 
-            AlertDialog dialog = builder.create();
+                    AlertDialog dialog = builder.create();
 
-            btnCancel.setOnClickListener(v -> {
-                if (serverUrl == null || serverUrl.isEmpty()) {
-                    finish(); // Exit if no URL set
-                } else {
-                    dialog.dismiss();
-                    enableFullscreen(); // Re-enable fullscreen
+                    btnCancel.setOnClickListener(v -> {
+                        if (serverUrl == null || serverUrl.isEmpty()) {
+                            finish(); // Exit if no URL set
+                        } else {
+                            dialog.dismiss();
+                            enableFullscreen(); // Re-enable fullscreen
+                        }
+                    });
+
+                    btnConnect.setOnClickListener(v -> {
+                        String inputUrl = etServerUrl.getText().toString().trim();
+
+                        if (inputUrl.isEmpty()) {
+                            showError("Please enter a server URL");
+                            return;
+                        }
+
+                        // Save URL if checked
+                        if (cbSaveUrl.isChecked()) {
+                            saveUrl(inputUrl);
+                        } else {
+                            clearSavedUrl();
+                        }
+
+                        serverUrl = inputUrl;
+                        dialog.dismiss();
+                        loadServerUrl(serverUrl);
+                        enableFullscreen(); // Re-enable fullscreen
+                    });
+
+                    dialog.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showError("Error showing settings: " + e.getMessage());
                 }
             });
-
-            btnConnect.setOnClickListener(v -> {
-                String inputUrl = etServerUrl.getText().toString().trim();
-
-                if (inputUrl.isEmpty()) {
-                    showError("Please enter a server URL");
-                    return;
-                }
-
-                // Save URL if checked
-                if (cbSaveUrl.isChecked()) {
-                    saveUrl(inputUrl);
-                } else {
-                    clearSavedUrl();
-                }
-
-                serverUrl = inputUrl;
-                dialog.dismiss();
-                loadServerUrl(serverUrl);
-                enableFullscreen(); // Re-enable fullscreen
-            });
-
-            dialog.show();
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Error: " + e.getMessage());
+        }
     }
 
     private void saveUrl(String url) {

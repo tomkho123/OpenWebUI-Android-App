@@ -4,12 +4,16 @@
     <color name="colorPrimary">#2196F3</color>
     <color name="colorPrimaryDark">#1976D2</color>
     <color name="headerBackground">#1976D2</color>
+    <color name="ic_launcher_background">#2196F3</color>
     <string name="app_name">Open WebUI</string>
     <string name="cancel">Cancel</string>
     <string name="connect">Connect</string>
     <string name="connection_error">Connection Error</string>
+    <string name="gesture_hint">Double-tap or long-press to open settings</string>
     <string name="invalid_url">Invalid URL. Please enter a valid URL.</string>
     <string name="loading">Loading…</string>
+    <string name="save_url">Save server URL</string>
     <string name="server_url">Server URL</string>
     <string name="settings">Settings</string>
+    <string name="settings_dialog_title">Server Settings</string>
 </resources>

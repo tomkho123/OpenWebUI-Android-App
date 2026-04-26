@@ -1,14 +1,38 @@
 [
     {
-        "merged": "com.openwebui.app-merged_res-31:/layout_dialog_settings.xml.flat",
-        "source": "com.openwebui.app-main-33:/layout/dialog_settings.xml"
+        "merged": "/home/ubuntu/.gradle/daemon/8.2/com.openwebui.app-merged_res-31:/layout_dialog_settings.xml.flat",
+        "source": "/home/ubuntu/.gradle/daemon/8.2/com.openwebui.app-main-33:/layout/dialog_settings.xml"
     },
     {
-        "merged": "com.openwebui.app-merged_res-31:/drawable_header_background.xml.flat",
-        "source": "com.openwebui.app-main-33:/drawable/header_background.xml"
+        "merged": "com.openwebui.app-merged_res-31:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.openwebui.app-main-33:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "com.openwebui.app-merged_res-31:/layout_activity_main.xml.flat",
-        "source": "com.openwebui.app-main-33:/layout/activity_main.xml"
+        "merged": "com.openwebui.app-merged_res-31:/drawable_ic_launcher.xml.flat",
+        "source": "com.openwebui.app-main-33:/drawable/ic_launcher.xml"
+    },
+    {
+        "merged": "com.openwebui.app-merged_res-31:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.openwebui.app-main-33:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.openwebui.app-merged_res-31:/mipmap-anydpi-v26_ic_launcher_foreground.xml.flat",
+        "source": "com.openwebui.app-main-33:/mipmap-anydpi-v26/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/home/ubuntu/.gradle/daemon/8.2/com.openwebui.app-merged_res-31:/drawable_header_background.xml.flat",
+        "source": "/home/ubuntu/.gradle/daemon/8.2/com.openwebui.app-main-33:/drawable/header_background.xml"
+    },
+    {
+        "merged": "com.openwebui.app-merged_res-31:/mipmap_ic_launcher_foreground.xml.flat",
+        "source": "com.openwebui.app-main-33:/mipmap/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.openwebui.app-merged_res-31:/mipmap_ic_launcher_background.xml.flat",
+        "source": "com.openwebui.app-main-33:/mipmap/ic_launcher_background.xml"
+    },
+    {
+        "merged": "/home/ubuntu/.gradle/daemon/8.2/com.openwebui.app-merged_res-31:/layout_activity_main.xml.flat",
+        "source": "/home/ubuntu/.gradle/daemon/8.2/com.openwebui.app-main-33:/layout/activity_main.xml"
     }
 ]

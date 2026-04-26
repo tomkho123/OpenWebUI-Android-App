@@ -46,7 +46,6 @@ MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/u
 MERGED from [androidx.print:print:1.0.0] /home/ubuntu/.gradle/caches/transforms-3/43ba6f97e942fb3c087233699f5ea349/transformed/print-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.annotation:annotation-experimental:1.3.0] /home/ubuntu/.gradle/caches/transforms-3/564ccea9b3c8a065eb7ff0117a9cb761/transformed/jetified-annotation-experimental-1.3.0/AndroidManifest.xml:17:1-22:12
 	package
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:3:5-32
 		INJECTED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml
 	android:versionName
 		INJECTED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml
@@ -55,16 +54,16 @@ MERGED from [androidx.annotation:annotation-experimental:1.3.0] /home/ubuntu/.gr
 	xmlns:android
 		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:2:11-69
 uses-permission#android.permission.INTERNET
-ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:5:5-67
+ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:4:5-67
 	android:name
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:5:22-64
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:4:22-64
 uses-permission#android.permission.ACCESS_NETWORK_STATE
-ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:6:5-79
+ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:5:5-79
 	android:name
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:6:22-76
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:5:22-76
 application
-ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:8:5-24:19
-INJECTED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:8:5-24:19
+ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:7:5-24:19
+INJECTED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:7:5-24:19
 MERGED from [com.google.android.material:material:1.11.0] /home/ubuntu/.gradle/caches/transforms-3/74a2558674f6dcad48a387d806131537/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.11.0] /home/ubuntu/.gradle/caches/transforms-3/74a2558674f6dcad48a387d806131537/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /home/ubuntu/.gradle/caches/transforms-3/4bcbdb61f70c63be020394c3ae9403e9/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
@@ -86,23 +85,25 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /home/ubuntu/.gradle/caches
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.9.0] /home/ubuntu/.gradle/caches/transforms-3/f0f4ee7c3b88100b2d2cd4b05ab423cd/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
 	android:label
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:11:9-35
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:10:9-35
 	android:icon
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:10:9-43
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:9:9-43
 	android:allowBackup
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:9:9-35
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:8:9-35
 	android:theme
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:12:9-67
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:11:9-67
 	android:usesCleartextTraffic
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:13:9-44
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:12:9-44
 activity#com.openwebui.app.MainActivity
-ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:15:9-23:20
+ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:14:9-23:20
+	android:screenOrientation
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:18:13-52
 	android:exported
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:17:13-36
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:16:13-36
 	android:configChanges
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:18:13-74
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:17:13-81
 	android:name
-		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:16:13-41
+		ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:15:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
 ADDED from /home/ubuntu/OpenWebUI-Android-App/app/src/main/AndroidManifest.xml:19:13-22:29
 action#android.intent.action.MAIN

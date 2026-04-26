@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.openwebui.app"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0-webview" >
 
     <uses-sdk
         android:minSdkVersion="24"
@@ -24,12 +24,13 @@
         android:extractNativeLibs="false"
         android:icon="@mipmap/ic_launcher"
         android:label="Open WebUI"
-        android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
         android:usesCleartextTraffic="true" >
         <activity
             android:name="com.openwebui.app.MainActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:exported="true" >
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+            android:exported="true"
+            android:screenOrientation="unspecified" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
