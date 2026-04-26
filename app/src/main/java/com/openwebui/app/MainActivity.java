@@ -9,6 +9,7 @@ import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -18,6 +19,7 @@ import androidx.core.view.GestureDetectorCompat;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.graphics.Rect;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 loadServerUrl(serverUrl);
             }
+
+            // Setup keyboard detection to rescale WebView
+            setupKeyboardDetection();
         } catch (Exception e) {
             e.printStackTrace();
             showError("Error initializing app: " + e.getMessage());
@@ -76,6 +81,10 @@ public class MainActivity extends AppCompatActivity {
         webView.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT));
+
+        // Add top padding to reduce accidental refresh/notification bar touches
+        webView.setPadding(0, 8, 0, 0); // 8px top padding to reduce top touch area
+        webView.setClipToPadding(false); // Allow content to render in padded area
 
         setContentView(webView);
 
@@ -107,6 +116,9 @@ public class MainActivity extends AppCompatActivity {
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
 
+        // Reduce font size by 5% (0.95 = 95% of original size)
+        settings.setTextZoom(95);
+
         // Configure WebViewClient
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -119,6 +131,10 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 // Re-apply fullscreen after page load
                 enableFullscreen();
+
+                // Inject CSS to prevent content from being pushed when keyboard opens
+                injectKeyboardHandlingCSS();
+
                 super.onPageFinished(view, url);
             }
 
@@ -256,6 +272,56 @@ public class MainActivity extends AppCompatActivity {
     private void showError(String message) {
         runOnUiThread(() -> {
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void injectKeyboardHandlingCSS() {
+        // Inject JavaScript to prevent content from being pushed when keyboard opens
+        String js = "javascript:(function() {" +
+            "var style = document.createElement('style');" +
+            "style.innerHTML = " +
+            "'html, body { height: 100% !important; overflow: hidden !important; }' +" +
+            "'input, textarea { font-size: 16px !important; }'; " + // Prevent zoom on focus
+            "document.head.appendChild(style);" +
+            "window.addEventListener('resize', function() {" +
+            "  var viewport = document.querySelector('meta[name=viewport]');" +
+            "  if (viewport) {" +
+            "    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');" +
+            "  }" +
+            "}, false);" +
+            "})()";
+        webView.evaluateJavascript(js, null);
+    }
+
+    private void setupKeyboardDetection() {
+        // Detect keyboard visibility changes and rescale WebView
+        final View activityRootView = getWindow().getDecorView().findViewById(android.R.id.content);
+        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            private final Rect windowVisibleDisplayFrame = new Rect();
+            private int lastVisibleHeight = 0;
+
+            @Override
+            public void onGlobalLayout() {
+                activityRootView.getWindowVisibleDisplayFrame(windowVisibleDisplayFrame);
+                int visibleHeight = windowVisibleDisplayFrame.height();
+
+                if (lastVisibleHeight != 0 && visibleHeight != lastVisibleHeight) {
+                    // Keyboard visibility changed
+                    if (visibleHeight < lastVisibleHeight) {
+                        // Keyboard opened - rescale WebView
+                        int heightDiff = lastVisibleHeight - visibleHeight;
+                        float scale = (float) visibleHeight / lastVisibleHeight;
+
+                        // Apply smooth scaling instead of pushing content up
+                        webView.setScaleY(scale);
+                        webView.setPivotY(0); // Scale from top
+                    } else {
+                        // Keyboard closed - restore original size
+                        webView.setScaleY(1.0f);
+                    }
+                }
+                lastVisibleHeight = visibleHeight;
+            }
         });
     }
 
