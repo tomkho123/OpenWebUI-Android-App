@@ -325,10 +325,10 @@ public class MainActivity extends AppCompatActivity {
             "  html {" +
             "    zoom: 1;" + // Reset zoom when keyboard closes
             "  }" +
-            "}'+" +
+            "'}" +
             "'body.keyboard-open {" +
             "  zoom: 0.75;" +
-            "}'";" +
+            "'}';" +
             "document.head.appendChild(style);" +
 
             // Add JavaScript to detect keyboard and apply classes
