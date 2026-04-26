@@ -82,8 +82,9 @@ public class MainActivity extends AppCompatActivity {
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT));
 
-        // Add top padding to reduce accidental refresh/notification bar touches
-        webView.setPadding(0, 8, 0, 0); // 8px top padding to reduce top touch area
+        // Add significant top padding to prevent accidental refresh when pulling notification bar
+        // System status bar is typically 25-30px, so we use 30px padding to avoid conflicts
+        webView.setPadding(0, 30, 0, 0);
         webView.setClipToPadding(false); // Allow content to render in padded area
 
         setContentView(webView);
@@ -119,6 +120,10 @@ public class MainActivity extends AppCompatActivity {
         // Reduce font size by 5% (0.95 = 95% of original size)
         settings.setTextZoom(95);
 
+        // Disable pull-to-refresh and overscroll effects
+        webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+
         // Configure WebViewClient
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -152,19 +157,29 @@ public class MainActivity extends AppCompatActivity {
         gestureDetector = new GestureDetectorCompat(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                // Double tap to open settings
-                showSettingsDialog();
-                return true;
+                // Double tap to open settings, but ignore touches in top status bar area
+                if (e.getY() > 50) { // Ignore top 50px (status bar area)
+                    showSettingsDialog();
+                    return true;
+                }
+                return false;
             }
 
             @Override
             public void onLongPress(MotionEvent e) {
-                // Long press also opens settings
-                showSettingsDialog();
+                // Long press also opens settings, but ignore touches in top status bar area
+                if (e.getY() > 50) { // Ignore top 50px (status bar area)
+                    showSettingsDialog();
+                }
             }
         });
 
         webView.setOnTouchListener((v, event) -> {
+            // Don't intercept touches in the top status bar area (top 50px)
+            if (event.getY() <= 50) {
+                // Let system handle these touches (for notification bar pull)
+                return false;
+            }
             gestureDetector.onTouchEvent(event);
             return false;
         });
