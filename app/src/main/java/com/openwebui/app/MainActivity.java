@@ -54,9 +54,6 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 loadServerUrl(serverUrl);
             }
-
-            // Setup keyboard detection to rescale WebView
-            setupKeyboardDetection();
         } catch (Exception e) {
             e.printStackTrace();
             showError("Error initializing app: " + e.getMessage());
@@ -82,10 +79,9 @@ public class MainActivity extends AppCompatActivity {
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT));
 
-        // Add significant top padding to prevent accidental refresh when pulling notification bar
-        // System status bar is typically 25-30px, so we use 30px padding to avoid conflicts
-        webView.setPadding(0, 30, 0, 0);
-        webView.setClipToPadding(false); // Allow content to render in padded area
+        // NO padding - let content use full screen
+        // We'll handle notification bar conflicts differently
+        webView.setPadding(0, 0, 0, 0);
 
         setContentView(webView);
 
@@ -120,10 +116,6 @@ public class MainActivity extends AppCompatActivity {
         // Reduce font size by 5% (0.95 = 95% of original size)
         settings.setTextZoom(95);
 
-        // Disable pull-to-refresh and overscroll effects
-        webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-
         // Configure WebViewClient
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -136,10 +128,6 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 // Re-apply fullscreen after page load
                 enableFullscreen();
-
-                // Inject CSS to prevent content from being pushed when keyboard opens
-                injectKeyboardHandlingCSS();
-
                 super.onPageFinished(view, url);
             }
 
@@ -157,8 +145,8 @@ public class MainActivity extends AppCompatActivity {
         gestureDetector = new GestureDetectorCompat(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                // Double tap to open settings, but ignore touches in top status bar area
-                if (e.getY() > 50) { // Ignore top 50px (status bar area)
+                // Only trigger if touch is well below status bar area
+                if (e.getY() > 150) { // Increased to 150px for safety
                     showSettingsDialog();
                     return true;
                 }
@@ -167,19 +155,21 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onLongPress(MotionEvent e) {
-                // Long press also opens settings, but ignore touches in top status bar area
-                if (e.getY() > 50) { // Ignore top 50px (status bar area)
+                // Only trigger if touch is well below status bar area
+                if (e.getY() > 150) { // Increased to 150px for safety
                     showSettingsDialog();
                 }
             }
         });
 
         webView.setOnTouchListener((v, event) -> {
-            // Don't intercept touches in the top status bar area (top 50px)
-            if (event.getY() <= 50) {
-                // Let system handle these touches (for notification bar pull)
-                return false;
+            float y = event.getY();
+
+            // Completely ignore all touches in top 150px for system gestures
+            if (y <= 150) {
+                return false; // Let system handle notification bar pulls
             }
+
             gestureDetector.onTouchEvent(event);
             return false;
         });
@@ -287,56 +277,6 @@ public class MainActivity extends AppCompatActivity {
     private void showError(String message) {
         runOnUiThread(() -> {
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-        });
-    }
-
-    private void injectKeyboardHandlingCSS() {
-        // Inject JavaScript to prevent content from being pushed when keyboard opens
-        String js = "javascript:(function() {" +
-            "var style = document.createElement('style');" +
-            "style.innerHTML = " +
-            "'html, body { height: 100% !important; overflow: hidden !important; }' +" +
-            "'input, textarea { font-size: 16px !important; }'; " + // Prevent zoom on focus
-            "document.head.appendChild(style);" +
-            "window.addEventListener('resize', function() {" +
-            "  var viewport = document.querySelector('meta[name=viewport]');" +
-            "  if (viewport) {" +
-            "    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');" +
-            "  }" +
-            "}, false);" +
-            "})()";
-        webView.evaluateJavascript(js, null);
-    }
-
-    private void setupKeyboardDetection() {
-        // Detect keyboard visibility changes and rescale WebView
-        final View activityRootView = getWindow().getDecorView().findViewById(android.R.id.content);
-        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            private final Rect windowVisibleDisplayFrame = new Rect();
-            private int lastVisibleHeight = 0;
-
-            @Override
-            public void onGlobalLayout() {
-                activityRootView.getWindowVisibleDisplayFrame(windowVisibleDisplayFrame);
-                int visibleHeight = windowVisibleDisplayFrame.height();
-
-                if (lastVisibleHeight != 0 && visibleHeight != lastVisibleHeight) {
-                    // Keyboard visibility changed
-                    if (visibleHeight < lastVisibleHeight) {
-                        // Keyboard opened - rescale WebView
-                        int heightDiff = lastVisibleHeight - visibleHeight;
-                        float scale = (float) visibleHeight / lastVisibleHeight;
-
-                        // Apply smooth scaling instead of pushing content up
-                        webView.setScaleY(scale);
-                        webView.setPivotY(0); // Scale from top
-                    } else {
-                        // Keyboard closed - restore original size
-                        webView.setScaleY(1.0f);
-                    }
-                }
-                lastVisibleHeight = visibleHeight;
-            }
         });
     }
 
