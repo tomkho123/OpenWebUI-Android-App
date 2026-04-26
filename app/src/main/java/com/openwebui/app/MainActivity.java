@@ -5,12 +5,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -20,7 +18,6 @@ import androidx.core.view.GestureDetectorCompat;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.graphics.Rect;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
     private GestureDetectorCompat gestureDetector;
     private static final String PREFS_NAME = "OpenWebUIPrefs";
     private static final String KEY_SERVER_URL = "server_url";
-    private int screenWidth;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -37,11 +33,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         try {
-            // Get screen dimensions
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            screenWidth = displayMetrics.widthPixels;
-
             // Enable fullscreen
             enableFullscreen();
 
@@ -61,9 +52,6 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 loadServerUrl(serverUrl);
             }
-
-            // Setup keyboard rescaling
-            setupKeyboardRescaling();
         } catch (Exception e) {
             e.printStackTrace();
             showError("Error initializing app: " + e.getMessage());
@@ -138,6 +126,10 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 // Re-apply fullscreen after page load
                 enableFullscreen();
+
+                // Inject CSS for better keyboard handling
+                injectKeyboardOptimizationCSS();
+
                 super.onPageFinished(view, url);
             }
 
@@ -290,50 +282,34 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupKeyboardRescaling() {
-        // Detect keyboard visibility and resize WebView layout to fit visible area
-        final View activityRootView = getWindow().getDecorView().findViewById(android.R.id.content);
-        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            private final Rect windowVisibleDisplayFrame = new Rect();
-            private int lastVisibleHeight = 0;
+    private void injectKeyboardOptimizationCSS() {
+        // Inject CSS to optimize content display when keyboard opens
+        String js = "javascript:(function() {" +
+            "var viewport = document.querySelector('meta[name=viewport]');" +
+            "if (viewport) {" +
+            "  viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');" +
+            "}" +
 
-            @Override
-            public void onGlobalLayout() {
-                activityRootView.getWindowVisibleDisplayFrame(windowVisibleDisplayFrame);
-                int visibleHeight = windowVisibleDisplayFrame.height();
-                int visibleWidth = windowVisibleDisplayFrame.width();
+            "var style = document.createElement('style');" +
+            "style.innerHTML = " +
+            "'html, body { height: 100% !important; overflow: auto !important; }' +" +
+            "'input, textarea, select { font-size: 16px !important; }' +" + // Prevent zoom
+            "'@media (max-height: 500px) {" +
+            "  html, body { zoom: 0.85; }' +" + // Zoom out when keyboard opens (height < 500px)
+            "'}';" +
+            "document.head.appendChild(style);" +
 
-                if (lastVisibleHeight != 0 && visibleHeight != lastVisibleHeight) {
-                    int screenHeight = activityRootView.getRootView().getHeight();
-                    int screenWidth = activityRootView.getRootView().getWidth();
-
-                    if (visibleHeight < lastVisibleHeight) {
-                        // Keyboard opened - resize WebView layout to fit visible area
-                        android.widget.LinearLayout.LayoutParams params =
-                            new android.widget.LinearLayout.LayoutParams(
-                                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                                visibleHeight
-                            );
-                        params.width = visibleWidth;
-                        params.height = visibleHeight;
-
-                        // Center the WebView in the available space
-                        params.gravity = android.view.Gravity.CENTER;
-
-                        webView.setLayoutParams(params);
-                    } else {
-                        // Keyboard closed - restore full screen layout
-                        android.widget.LinearLayout.LayoutParams params =
-                            new android.widget.LinearLayout.LayoutParams(
-                                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                                android.widget.LinearLayout.LayoutParams.MATCH_PARENT
-                            );
-                        webView.setLayoutParams(params);
-                    }
-                }
-                lastVisibleHeight = visibleHeight;
-            }
-        });
+            // Listen for keyboard events and adjust viewport
+            "window.addEventListener('resize', function() {" +
+            "  var height = window.innerHeight;" +
+            "  if (height < 600) {" +
+            "    document.body.style.zoom = (height / 800).toString();" +
+            "  } else {" +
+            "    document.body.style.zoom = '1';" +
+            "  }" +
+            "}, false);" +
+            "})()";
+        webView.evaluateJavascript(js, null);
     }
 
     @Override
