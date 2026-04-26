@@ -291,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupKeyboardRescaling() {
-        // Detect keyboard visibility and rescale WebView instead of pushing content
+        // Detect keyboard visibility and rescale WebView to fit actual visible area
         final View activityRootView = getWindow().getDecorView().findViewById(android.R.id.content);
         activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             private final Rect windowVisibleDisplayFrame = new Rect();
@@ -301,23 +301,31 @@ public class MainActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 activityRootView.getWindowVisibleDisplayFrame(windowVisibleDisplayFrame);
                 int visibleHeight = windowVisibleDisplayFrame.height();
+                int visibleWidth = windowVisibleDisplayFrame.width();
 
                 if (lastVisibleHeight != 0 && visibleHeight != lastVisibleHeight) {
                     int screenHeight = activityRootView.getRootView().getHeight();
+                    int screenWidth = activityRootView.getRootView().getWidth();
 
                     if (visibleHeight < lastVisibleHeight) {
-                        // Keyboard opened - rescale WebView to fit remaining space
-                        float availableRatio = (float) visibleHeight / screenHeight;
+                        // Keyboard opened - rescale WebView to fit visible area
+                        float heightRatio = (float) visibleHeight / screenHeight;
+                        float widthRatio = (float) visibleWidth / screenWidth;
 
-                        // Apply uniform scaling to WebView (zoom out)
-                        webView.setScaleX(availableRatio);
-                        webView.setScaleY(availableRatio);
-                        webView.setPivotX(0);
-                        webView.setPivotY(0); // Scale from top-left corner
+                        // Use the smaller ratio to ensure content fits both dimensions
+                        float scale = Math.min(heightRatio, widthRatio);
+
+                        // Apply scaling from center for better appearance
+                        webView.setScaleX(scale);
+                        webView.setScaleY(scale);
+                        webView.setPivotX(screenWidth / 2f); // Center horizontally
+                        webView.setPivotY(0); // Keep at top
                     } else {
                         // Keyboard closed - restore original size
                         webView.setScaleX(1.0f);
                         webView.setScaleY(1.0f);
+                        webView.setPivotX(0);
+                        webView.setPivotY(0);
                     }
                 }
                 lastVisibleHeight = visibleHeight;
